@@ -1,0 +1,41 @@
+name: Run Monitor Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Permite rodar o workflow manualmente pelo GitHub
+
+env:
+  GLOBAL_ENV: "Variavel de ambiente global do workflow"
+
+jobs:
+  job_com_env:
+    name: Demonstração do contexto env
+    runs-on: ubuntu-latest
+    env:
+      LOCAL_ENV: "Variavel restrita a este job"
+    steps:
+      - name: Exibir variáveis de ambiente
+        run: |
+          echo "Acessando env global: ${{ env.GLOBAL_ENV }}"
+          echo "Acessando env local: ${{ env.LOCAL_ENV }}"
+
+  job_com_vars:
+    name: Demonstração do contexto vars
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exibir variáveis do repositório
+        run: |
+          echo "Ambiente da Aplicação: ${{ vars.APP_ENV }}"
+          echo "Contato do Suporte: ${{ vars.SUPPORT_EMAIL }}"
+
+  job_com_secrets:
+    name: Demonstração do contexto secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Utilizar segredo de forma segura
+        run: |
+          echo "Lendo a API KEY..."
+          # O GitHub Actions mascarará automaticamente o valor do secret no log com ***
+          echo "A chave configurada é: ${{ secrets.API_KEY }}"
