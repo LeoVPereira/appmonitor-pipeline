@@ -1,0 +1,63 @@
+name: Diagnostic Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Permite rodar o diagnóstico manualmente se necessário
+
+jobs:
+  diagnose:
+    name: Run System Diagnostics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Verificar variáveis e segredos obrigatórios
+        # Mapeando as variáveis do GitHub para o ambiente do Runner
+        env:
+          APP_ENV: ${{ vars.APP_ENV }}
+          API_KEY: ${{ secrets.API_KEY }}
+        run: |
+          echo "Iniciando diagnóstico do ambiente..."
+          MISSING_VARS=0
+
+          # Verificando APP_ENV
+          if [ -z "$APP_ENV" ]; then
+            echo "::error title=Variável Ausente::A variável obrigatória APP_ENV não foi encontrada."
+            MISSING_VARS=1
+          else
+            echo "APP_ENV detectada."
+          fi
+
+          # Verificando API_KEY
+          if [ -z "$API_KEY" ]; then
+            echo "::error title=Segredo Ausente::O segredo obrigatório API_KEY não foi encontrado."
+            MISSING_VARS=1
+          else
+            echo "API_KEY detectada."
+          fi
+
+          # Tomada de decisão baseada no diagnóstico
+          if [ $MISSING_VARS -eq 1 ]; then
+            echo "::error title=Falha Crítica::Diagnóstico falhou devido à ausência de configurações obrigatórias."
+            
+            # Gerando Job Summary com instruções de correção
+            echo "### Falha no Diagnóstico" >> $GITHUB_STEP_SUMMARY
+            echo "O pipeline de diagnóstico foi abortado porque configurações essenciais estão ausentes." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Sugestão de Correção:**" >> $GITHUB_STEP_SUMMARY
+            echo "1. Acesse a aba **Settings** do repositório." >> $GITHUB_STEP_SUMMARY
+            echo "2. Navegue até **Secrets and variables > Actions**." >> $GITHUB_STEP_SUMMARY
+            echo "3. Certifique-se de que a variável \`APP_ENV\` e o segredo \`API_KEY\` estão devidamente cadastrados." >> $GITHUB_STEP_SUMMARY
+            
+            # Força a falha do Job
+            exit 1
+          else
+            echo "Todas as dependências estão configuradas. O ambiente está saudável."
+            
+            # Job Summary de Sucesso
+            echo "### Diagnóstico Concluído com Sucesso" >> $GITHUB_STEP_SUMMARY
+            echo "O ambiente possui todas as variáveis e segredos obrigatórios para execução dos pipelines." >> $GITHUB_STEP_SUMMARY
+          fi
