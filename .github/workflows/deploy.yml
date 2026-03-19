@@ -23,3 +23,4 @@ jobs:
           echo "Aguardando aprovação concluída. Iniciando deploy..."
           echo "Deploying to $PROD_DOMAIN"
           echo "Deploy finalizado com sucesso."
+# Fiz esse segundo commit após ter reconfigurado as configurações de Environments no GitHub.
