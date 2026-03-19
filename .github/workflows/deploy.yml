@@ -1,0 +1,25 @@
+name: Deploy Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy_prod:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    # Vincula este job ao ambiente criado, ativando a pausa para aprovação manual
+    environment: production 
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Simular Deploy
+        # Mapeando a variável do ambiente (vars) para o escopo do shell (env)
+        env: 
+          PROD_DOMAIN: ${{ vars.PROD_DOMAIN }}
+        run: |
+          echo "Aguardando aprovação concluída. Iniciando deploy..."
+          echo "Deploying to $PROD_DOMAIN"
+          echo "Deploy finalizado com sucesso."
