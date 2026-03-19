@@ -6,6 +6,10 @@ on:
       - main
   pull_request:
 
+env:
+  # Ativando logs de debug para maior detalhamento nos runners
+  ACTIONS_STEP_DEBUG: true
+
 jobs:
   validate:
     name: Validate Script
@@ -15,7 +19,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Verificar sintaxe do script
-        run: bash -n status-check.sh
+        run: |
+          bash -n status-check.sh
+          # Exemplo de anotação de aviso
+          echo "::warning title=Aviso de Validação::A sintaxe está correta, mas lembre-se de validar a lógica de negócio."
 
   test:
     name: Run Tests
@@ -26,7 +33,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Simular testes
-        run: echo "Running tests" && exit 0
+        run: |
+          echo "Running tests..."
+          # Exemplo de anotação de erro (simulada para não quebrar o pipeline)
+          echo "::error title=Alerta de Teste::Um comportamento inesperado foi detectado nos testes simulados."
+          exit 0
 
   package:
     name: Package Report
@@ -46,3 +57,12 @@ jobs:
         with:
           name: report-artifact
           path: report.zip
+
+      - name: Gerar Job Summary
+        run: |
+          echo "### Resumo da Execução do Pipeline AppMonitor" >> $GITHUB_STEP_SUMMARY
+          echo "- **Sistema Operacional do Runner:** ${{ runner.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch/Ref executada:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Resultado dos Steps:** Validação e Testes concluídos." >> $GITHUB_STEP_SUMMARY
+          echo "- **Artefato gerado:** O pacote foi enviado com sucesso." >> $GITHUB_STEP_SUMMARY
+          echo "> *Nota: Baixe o arquivo na seção 'Artifacts' abaixo.*" >> $GITHUB_STEP_SUMMARY
